@@ -12,9 +12,17 @@ metadata:
   name: nififns.nififn.nifi-stateless.b23.io
 spec:
   additionalPrinterColumns:
-  - JSONPath: .spec.flow
+  - JSONPath: .spec.registryUrl
+    description: The url of the NiFi-Registry
+    name: Registry URL
+    type: string
+  - JSONPath: .spec.bucketId
+    description: The UUID of the Bucket in NiFi-Registry
+    name: Bucket ID
+    type: string
+  - JSONPath: .spec.flowId
     description: The UUID of the Flow in NiFi-Registry
-    name: Flow
+    name: Flow ID
     type: string
   - JSONPath: .spec.flowVersion
     description: The version of the NiFiFlow
@@ -62,7 +70,6 @@ spec:
                 additionalProperties:
                   type: string
                 type: object
-              minItems: 1
               type: array
             flowId:
               maxLength: 36
@@ -72,6 +79,11 @@ spec:
               format: int32
               type: integer
             flowXmlPath:
+              type: string
+            image:
+              pattern: .+:.+
+              type: string
+            imagePullSecret:
               type: string
             materializeContent:
               type: boolean
@@ -113,7 +125,6 @@ spec:
               - truststoreType
               type: object
           required:
-          - flowFiles
           - runFrom
           type: object
         status:

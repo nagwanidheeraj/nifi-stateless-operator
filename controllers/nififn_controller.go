@@ -61,8 +61,24 @@ func (r *NiFiFnReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		runFrom := runFromCmdLookup[nififn.Spec.RunFrom]
 
 		image := defaultImage
+		log.V(1).Info("Image in Spec", "image", nififn.Spec.Image)
+
 		if nififn.Spec.Image != "" {
+			log.Info("Using Spec provided image", "image", nififn.Spec.Image)
 			image = nififn.Spec.Image
+
+			//Setting the .Spec.Image as empty to prevent from marshaling
+			nififn.Spec.Image = ""
+		}
+
+		log.V(1).Info("Using Image", "image", image)
+
+		imagePullSecret := ""
+		if nififn.Spec.ImagePullSecret != "" {
+			imagePullSecret = nififn.Spec.ImagePullSecret
+
+			//Setting the .Spec.ImagePullSecret as empty to prevent from marshaling
+			nififn.Spec.ImagePullSecret = ""
 		}
 
 		// Make sure nifi_content is defined for every flowfile, otherwise nifi-stateless throws a null ptr
@@ -77,6 +93,7 @@ func (r *NiFiFnReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			return nil, err
 		}
 
+		// TODO: Support 'Continuous' mode for a flow.
 		args := []string{
 			runFrom,
 			"Once",
@@ -104,6 +121,14 @@ func (r *NiFiFnReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 					},
 				},
 			},
+		}
+
+		if imagePullSecret != "" {
+			job.Spec.Template.Spec.ImagePullSecrets = []corev1.LocalObjectReference{
+				{
+					Name: imagePullSecret,
+				},
+			}
 		}
 
 		if err := ctrl.SetControllerReference(nififn, job, r.Scheme); err != nil {

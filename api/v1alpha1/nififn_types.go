@@ -65,7 +65,8 @@ type NiFiFnSpec struct {
 	FlowXMLPath string `json:"flowXmlPath,omitempty"`
 
 	// +kubebuilder:validation:Pattern=.+:.+
-	Image string `json:"-"`
+	Image           string `json:"image,omitempty"`
+	ImagePullSecret string `json:"imagePullSecret,omitempty"`
 
 	MaterializeContent bool `json:"materializeContent,omitempty"`
 
@@ -73,9 +74,7 @@ type NiFiFnSpec struct {
 
 	SSLConfig `json:"ssl,omitempty"`
 
-	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:MinItems=1
-	FlowFiles []map[string]string `json:"flowFiles"`
+	FlowFiles []map[string]string `json:"flowFiles,omitempty"`
 
 	Parameters map[string]string `json:"parameters,omitempty"`
 }
@@ -95,7 +94,9 @@ type NiFiFnStatus struct {
 // +kubebuilder:object:root=true
 
 // NiFiFn is the Schema for the nififns API
-// +kubebuilder:printcolumn:name="Flow",type="string",JSONPath=".spec.flow",description="The UUID of the Flow in NiFi-Registry"
+// +kubebuilder:printcolumn:name="Registry URL",type="string",JSONPath=".spec.registryUrl",description="The url of the NiFi-Registry"
+// +kubebuilder:printcolumn:name="Bucket ID",type="string",JSONPath=".spec.bucketId",description="The UUID of the Bucket in NiFi-Registry"
+// +kubebuilder:printcolumn:name="Flow ID",type="string",JSONPath=".spec.flowId",description="The UUID of the Flow in NiFi-Registry"
 // +kubebuilder:printcolumn:name="Version",type="integer",JSONPath=".spec.flowVersion",description="The version of the NiFiFlow"
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
 // TODO: +kubebuilder:subresource:status
